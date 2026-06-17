@@ -94,6 +94,15 @@ label.slabel{font-size:13px;color:var(--muted);font-weight:500;display:block;mar
       </div>
     </div>
 
+    <!-- 电缆数量 -->
+    <div id="count-opts">
+      <label class="slabel" style="margin-top:4px">并联根数</label>
+      <div class="options-row" id="count-btns">
+        <button class="opt-btn active" data-val="1">单根</button>
+        <button class="opt-btn" data-val="2">双根并联</button>
+      </div>
+    </div>
+
     <!-- 敷设方式 (电缆) -->
     <div id="method-opts">
       <label class="slabel" style="margin-top:2px">敷设方式</label>
@@ -136,8 +145,9 @@ label.slabel{font-size:13px;color:var(--muted);font-weight:500;display:block;mar
     ⚠️ <b>工程提示</b>：<br>
     1. 电缆数据参考 GB 50217-2018，铜排参考 DL/T 5222-2021<br>
     2. 铝电缆等效截面 ≈ 铜截面 × 1.6（铝导电率 ≈ 铜的 62%）<br>
-    3. 电缆并列敷设间距 ≥ 2 倍外径；铜排并列间距 ≥ 排宽<br>
-    4. 大电流 (≥400A) 优先考虑铜排，散热好、省空间
+    3. 双根并联按不均流系数 1.05 折算（每根承受 52.5% 总电流）<br>
+    4. 电缆并列敷设间距 ≥ 2 倍外径；铜排并列间距 ≥ 排宽<br>
+    5. 大电流 (≥400A) 优先考虑铜排或双电缆方案，散热好、省空间
   </div>
 </div>
 
@@ -171,7 +181,7 @@ var cableMethod={air:1.0, pipe:0.72, buried:0.85};
 var coreFactors={1:1.0, 3:1.0, 4:0.9, 5:0.8};
 
 // ==== 状态 ====
-var curType='cu', curCore='3', curMethod='air', curBbMethod='open';
+var curType='cu', curCore='3', curMethod='air', curBbMethod='open', curCount='1';
 
 // 类型切换
 document.querySelectorAll('#type-opts .type-btn').forEach(function(b){
@@ -180,6 +190,7 @@ document.querySelectorAll('#type-opts .type-btn').forEach(function(b){
     this.classList.add('active');
     curType=this.dataset.type;
     document.getElementById('core-opts').classList.toggle('hidden',curType==='bb');
+    document.getElementById('count-opts').classList.toggle('hidden',curType==='bb');
     document.getElementById('method-opts').classList.toggle('hidden',curType==='bb');
     document.getElementById('bb-opts').classList.toggle('hidden',curType!=='bb');
     calc();
@@ -213,6 +224,15 @@ document.querySelectorAll('#bb-method-btns .opt-btn').forEach(function(b){
   });
 });
 
+// 电缆根数
+document.querySelectorAll('#count-btns .opt-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#count-btns .opt-btn').forEach(function(x){x.classList.remove('active')});
+    this.classList.add('active');
+    curCount=this.dataset.val; calc();
+  });
+});
+
 // ==== 计算 ====
 function calc(){
   var I=parseFloat(document.getElementById('current').value)||0;
@@ -224,7 +244,10 @@ function calc(){
   if(curType==='cu'){
     // 铜电缆
     var mf=cableMethod[curMethod], cf=coreFactors[curCore];
-    var Ieq=I/(mf*cf);
+    var n=parseInt(curCount); // 并联根数
+    // 双根并联不均流系数 1.05
+    var div=n===2?n*1.05:n;
+    var Ieq=I/(mf*cf*div);
     var sel=null;
     for(var i=0;i<cuCable.length;i++){
       var a=curCore==='1'?cuCable[i].a1:cuCable[i].a3;
@@ -243,7 +266,9 @@ function calc(){
   else if(curType==='al'){
     // 铝电缆
     var mf=cableMethod[curMethod], cf=coreFactors[curCore];
-    var Ieq=I/(mf*cf);
+    var n=parseInt(curCount);
+    var div=n===2?n*1.05:n;
+    var Ieq=I/(mf*cf*div);
     var sel=null;
     for(var i=0;i<cuCable.length;i++){
       var cuA=curCore==='1'?cuCable[i].a1:cuCable[i].a3;
@@ -272,25 +297,32 @@ function calc(){
 }
 
 function buildCuResult(s,amp,I,Ieq,mf,cf,core){
-  var cls=curType==='cu'?'both-grid':'';
+  var n=parseInt(curCount);
   var mname={air:'空气中',pipe:'穿管',buried:'埋地'};
   var cname={'1':'单芯','3':'3芯','4':'4芯','5':'5芯'};
+  var cntLabel=n===2?' · 双根并联':' · 单根';
+  var cntNote=n===2?'每根承受 ≈ '+(I/(2*1.05)).toFixed(0)+' A（不均流系数1.05）':'';
   return '<div class="card result-card copper-card">'+
-    '<div class="result-header"><span class="rtype">🔶 铜电缆选型</span><span class="rlabel">'+cname[core]+' · '+mname[curMethod]+'</span></div>'+
-    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">安全载流量 '+amp+' A</span></div>'+
-    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>等效 <b>'+Math.round(Ieq)+' A</b></span><span>修正 <b>×'+(mf*cf).toFixed(2)+'</b></span></div>'+
+    '<div class="result-header"><span class="rtype">🔶 铜电缆选型</span><span class="rlabel">'+cname[core]+cntLabel+' · '+mname[curMethod]+'</span></div>'+
+    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
+    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>等效 <b>'+Math.round(Ieq)+' A</b></span><span>修正 <b>×'+(mf*cf*(n===2?n*1.05:n)).toFixed(2)+'</b></span></div>'+
+    (cntNote?'<div class="info-row" style="border-top:none;padding-top:0">'+cntNote+'</div>':'')+
   '</div>';
 }
 
 function buildAlResult(s,amp,I,Ieq,mf,cf,core,isMain){
+  var n=parseInt(curCount);
   var mname={air:'空气中',pipe:'穿管',buried:'埋地'};
   var cname={'1':'单芯','3':'3芯','4':'4芯','5':'5芯'};
+  var cntLabel=n===2?' · 双根并联':' · 单根';
   var label=isMain?'🔘 铝电缆选型（直接选）':'🔘 等效铝电缆（同载流量）';
-  var sub=isMain?(cname[core]+' · '+mname[curMethod]):'铝截面 ≈ 铜 × 1.6';
+  var sub=isMain?(cname[core]+cntLabel+' · '+mname[curMethod]):'铝截面 ≈ 铜 × 1.6';
+  var cntNote=n===2?'每根承受 ≈ '+(I/(2*1.05)).toFixed(0)+' A（不均流系数1.05）':'';
   return '<div class="card result-card alum-card" style="margin-top:12px">'+
     '<div class="result-header"><span class="rtype">'+label+'</span><span class="rlabel">'+sub+'</span></div>'+
-    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">安全载流量 '+amp+' A</span></div>'+
+    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
     '<div class="info-row"><span>输入 <b>'+I+' A</b></span>'+(Ieq!==undefined?'<span>等效 <b>'+Math.round(Ieq)+' A</b></span>':'')+'<span>铝载流量 ≈ 铜 × 0.77</span></div>'+
+    (cntNote?'<div class="info-row" style="border-top:none;padding-top:0">'+cntNote+'</div>':'')+
   '</div>';
 }
 
