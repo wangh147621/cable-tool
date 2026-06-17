@@ -244,9 +244,9 @@ function calc(){
   if(curType==='cu'){
     // 铜电缆
     var mf=cableMethod[curMethod], cf=coreFactors[curCore];
-    var n=parseInt(curCount); // 并联根数
-    // 双根并联不均流系数 1.05
-    var div=n===2?n*1.05:n;
+    var n=parseInt(curCount);
+    // 双根并联：每根承受 0.55I（不均流1.1 + 并列敷设降容0.9 → 0.5/0.9≈0.55）
+    var div=n===2?1/0.55:1;
     var Ieq=I/(mf*cf*div);
     var sel=null;
     for(var i=0;i<cuCable.length;i++){
@@ -267,7 +267,7 @@ function calc(){
     // 铝电缆
     var mf=cableMethod[curMethod], cf=coreFactors[curCore];
     var n=parseInt(curCount);
-    var div=n===2?n*1.05:n;
+    var div=n===2?1/0.55:1;
     var Ieq=I/(mf*cf*div);
     var sel=null;
     for(var i=0;i<cuCable.length;i++){
@@ -301,11 +301,11 @@ function buildCuResult(s,amp,I,Ieq,mf,cf,core){
   var mname={air:'空气中',pipe:'穿管',buried:'埋地'};
   var cname={'1':'单芯','3':'3芯','4':'4芯','5':'5芯'};
   var cntLabel=n===2?' · 双根并联':' · 单根';
-  var cntNote=n===2?'每根承受 ≈ '+(I/(2*1.05)).toFixed(0)+' A（不均流系数1.05）':'';
+  var cntNote=n===2?'每根承受 ≈ '+Math.round(I*0.55)+' A（总电流×0.55，含不均流1.1+并列0.9）':'';
   return '<div class="card result-card copper-card">'+
     '<div class="result-header"><span class="rtype">🔶 铜电缆选型</span><span class="rlabel">'+cname[core]+cntLabel+' · '+mname[curMethod]+'</span></div>'+
     '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
-    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>等效 <b>'+Math.round(Ieq)+' A</b></span><span>修正 <b>×'+(mf*cf*(n===2?n*1.05:n)).toFixed(2)+'</b></span></div>'+
+    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>等效 <b>'+Math.round(Ieq)+' A</b></span><span>修正 <b>×'+(mf*cf*(n===2?1/0.55:1)).toFixed(2)+'</b></span></div>'+
     (cntNote?'<div class="info-row" style="border-top:none;padding-top:0">'+cntNote+'</div>':'')+
   '</div>';
 }
@@ -317,7 +317,7 @@ function buildAlResult(s,amp,I,Ieq,mf,cf,core,isMain){
   var cntLabel=n===2?' · 双根并联':' · 单根';
   var label=isMain?'🔘 铝电缆选型（直接选）':'🔘 等效铝电缆（同载流量）';
   var sub=isMain?(cname[core]+cntLabel+' · '+mname[curMethod]):'铝截面 ≈ 铜 × 1.6';
-  var cntNote=n===2?'每根承受 ≈ '+(I/(2*1.05)).toFixed(0)+' A（不均流系数1.05）':'';
+  var cntNote=n===2?'每根承受 ≈ '+Math.round(I*0.55)+' A（总电流×0.55，含不均流1.1+并列0.9）':'';
   return '<div class="card result-card alum-card" style="margin-top:12px">'+
     '<div class="result-header"><span class="rtype">'+label+'</span><span class="rlabel">'+sub+'</span></div>'+
     '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
