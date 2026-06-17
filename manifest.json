@@ -1,0 +1,12 @@
+{
+  "name": "电缆铜排选型工具",
+  "short_name": "电缆选型",
+  "description": "电缆铜排载流量选型计算工具 GB50217-2018",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [{"src":"icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]
+}
