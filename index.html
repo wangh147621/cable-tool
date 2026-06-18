@@ -3,382 +3,189 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0d1117">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="电缆选型">
-<title>电缆铜排选型工具 · Cable &amp; Busbar Selector</title>
+<title>电缆铜排选型工具</title>
 <style>
-:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--acc:#58a6ff;--green:#3fb950;--warn:#d2991d;--red:#f85149;--muted:#8b949e;--cu:#e6a832;--al:#a8b8c8;--bb:#58a6ff}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--acc:#58a6ff;--green:#3fb950;--warn:#d2991d;--muted:#8b949e}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,'PingFang SC','Noto Sans SC',sans-serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px 12px}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'PingFang SC',sans-serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:20px 12px}
 #app{width:100%;max-width:540px;display:flex;flex-direction:column;gap:16px}
 header{text-align:center;padding:6px 0}
-header h1{font-size:22px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,var(--acc),#a371f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--acc),#a371f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 header p{color:var(--muted);font-size:13px;margin-top:4px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
-label.slabel{font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:7px}
+label.sl{font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px}
+.options-row{display:flex;gap:6px;flex-wrap:wrap}
+.opt-btn{flex:1;min-width:55px;padding:10px 5px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:11px;cursor:pointer;text-align:center;transition:all 0.15s;font-weight:500}
+.opt-btn:hover{border-color:var(--acc);color:var(--text)}
+.opt-btn.active{background:rgba(88,166,255,0.12);border-color:var(--acc);color:var(--acc)}
+.type-btn{flex:1;min-width:70px;padding:12px 10px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--muted);font-size:13px;cursor:pointer;text-align:center;font-weight:600;transition:all 0.2s}
+.type-btn:hover{border-color:var(--acc)}
+.type-btn.active.cu-type{border-color:#e6a832;background:rgba(230,168,50,0.08);color:#e6a832}
+.type-btn.active.al-type{border-color:#a8b8c8;background:rgba(168,184,200,0.08);color:#a8b8c8}
+.type-btn.active.bb-type{border-color:var(--acc);background:rgba(88,166,255,0.08);color:var(--acc)}
+.hidden{display:none!important}
 .input-row{display:flex;align-items:center;gap:10px}
 .input-row input{flex:1;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-size:22px;font-weight:700;outline:none;width:100%;transition:border 0.2s}
 .input-row input:focus{border-color:var(--acc)}
-.input-row .unit{color:var(--acc);font-size:16px;font-weight:600;white-space:nowrap}
-.options-row{display:flex;gap:6px;flex-wrap:wrap}
-.opt-btn{flex:1;min-width:60px;padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:12px;cursor:pointer;text-align:center;transition:all 0.15s;font-weight:500}
-.opt-btn:hover{border-color:var(--acc);color:var(--text)}
-.opt-btn.active{background:rgba(88,166,255,0.12);border-color:var(--acc);color:var(--acc)}
-.type-btn{flex:1;min-width:70px;padding:12px 10px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--muted);font-size:13px;cursor:pointer;text-align:center;font-weight:600;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.type-btn .icon{font-size:20px}
-.type-btn:hover{border-color:var(--acc)}
-.type-btn.active.cu-type{border-color:var(--cu);background:rgba(230,168,50,0.08);color:var(--cu)}
-.type-btn.active.al-type{border-color:var(--al);background:rgba(168,184,200,0.08);color:var(--al)}
-.type-btn.active.bb-type{border-color:var(--acc);background:rgba(88,166,255,0.08);color:var(--acc)}
-#core-opts,#method-opts,#bb-opts{margin-top:12px}
-.hidden{display:none!important}
-.result-card{border:2px solid var(--border)}
-.result-card.copper-card{border-color:rgba(230,168,50,0.5);background:rgba(230,168,50,0.03)}
-.result-card.alum-card{border-color:rgba(168,184,200,0.5);background:rgba(168,184,200,0.03)}
+.input-row .unit{color:var(--acc);font-size:16px;font-weight:600}
+.result-card{border:2px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:12px}
+.result-card.cu-card{border-color:rgba(230,168,50,0.5);background:rgba(230,168,50,0.03)}
+.result-card.al-card{border-color:rgba(168,184,200,0.5);background:rgba(168,184,200,0.03)}
 .result-card.bb-card{border-color:rgba(88,166,255,0.5);background:rgba(88,166,255,0.03)}
-.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.result-header .rtype{font-size:13px;font-weight:600}
-.result-header .rlabel{font-size:12px;color:var(--muted)}
-.result-main{display:flex;justify-content:space-between;align-items:flex-end}
-.result-main .size{font-size:36px;font-weight:800;letter-spacing:1px}
-.result-main .amp{font-size:16px;color:var(--muted)}
-.copper-card .rtype{color:var(--cu)} .copper-card .size{color:var(--cu)}
-.alum-card .rtype{color:var(--al)} .alum-card .size{color:var(--al)}
-.bb-card .rtype{color:var(--acc)} .bb-card .size{color:var(--acc)}
-.info-row{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)}
-.info-row span b{color:var(--text);font-weight:500}
-.both-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ref-table{width:100%;font-size:12px;border-collapse:collapse}
-.ref-table th{text-align:left;color:var(--muted);font-weight:500;padding:7px 6px;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:1px}
-.ref-table td{padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text)}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rh .rt{font-size:13px;font-weight:600}.rh .rl{font-size:11px;color:var(--muted)}
+.rm{display:flex;justify-content:space-between;align-items:flex-end}
+.rm .sz{font-size:34px;font-weight:800}.rm .ap{font-size:15px;color:var(--muted)}
+.ir{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.04)}
+.cu-card .rt,.cu-card .sz{color:#e6a832}
+.al-card .rt,.al-card .sz{color:#a8b8c8}
+.bb-card .rt,.bb-card .sz{color:var(--acc)}
+.ref-table{width:100%;font-size:11px;border-collapse:collapse}
+.ref-table th{text-align:left;color:var(--muted);font-weight:500;padding:6px 5px;border-bottom:2px solid var(--border);font-size:10px;text-transform:uppercase}
+.ref-table td{padding:5px 5px;border-bottom:1px solid rgba(255,255,255,0.04)}
 .ref-table tr.hl td{color:var(--acc);font-weight:600;background:rgba(88,166,255,0.06)}
-.ref-table tr.hl-cu td{color:var(--cu);font-weight:600;background:rgba(230,168,50,0.06)}
-.ref-table tr.hl-al td{color:var(--al);font-weight:600;background:rgba(168,184,200,0.06)}
 .note{color:var(--muted);font-size:11px;line-height:1.6;padding:10px 14px;background:rgba(210,153,29,0.05);border:1px solid rgba(210,153,29,0.12);border-radius:10px}
-@media(max-width:400px){.result-main .size{font-size:28px}.both-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.rm .sz{font-size:26px}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <h1>⚡ 电缆 · 铜排选型工具</h1>
-    <p>GB 50217-2018 &nbsp;|&nbsp; 铜缆 / 铝缆 / 铜排一键匹配</p>
-  </header>
+<header><h1>⚡ 电缆 · 铜排选型工具</h1><p>GB 50217-2018 &nbsp;|&nbsp; GB 50054-2011</p></header>
 
-  <!-- 导体类型 -->
-  <div class="card">
-    <label class="slabel">导体类型</label>
-    <div class="options-row" id="type-opts">
-      <button class="type-btn active cu-type" data-type="cu">
-        <span class="icon">🔶</span>铜电缆
-      </button>
-      <button class="type-btn al-type" data-type="al">
-        <span class="icon">🔘</span>铝电缆
-      </button>
-      <button class="type-btn bb-type" data-type="bb">
-        <span class="icon">🟦</span>铜排
-      </button>
+<div class="card">
+  <label class="sl">导体类型</label>
+  <div class="options-row" id="type-opts">
+    <button class="type-btn active cu-type" data-type="cu">🔶 铜电缆</button>
+    <button class="type-btn al-type" data-type="al">🔘 铝电缆</button>
+    <button class="type-btn bb-type" data-type="bb">🟦 铜排</button>
+  </div>
+  <div id="cable-opts">
+    <label class="sl" style="margin-top:8px">电缆芯数</label>
+    <div class="options-row" id="core-btns">
+      <button class="opt-btn" data-val="1">单芯</button>
+      <button class="opt-btn active" data-val="3">3芯</button>
+      <button class="opt-btn" data-val="4">4芯</button>
+      <button class="opt-btn" data-val="5">5芯</button>
     </div>
-
-    <!-- 电缆参数 (铜/铝共用) -->
-    <div id="core-opts">
-      <label class="slabel" style="margin-top:2px">电缆芯数</label>
-      <div class="options-row" id="core-btns">
-        <button class="opt-btn" data-val="1">单芯</button>
-        <button class="opt-btn active" data-val="3">3芯</button>
-        <button class="opt-btn" data-val="4">4芯</button>
-        <button class="opt-btn" data-val="5">5芯</button>
-      </div>
+    <label class="sl" style="margin-top:6px">并联根数 ≤wbr≥(同一回路)</label>
+    <div class="options-row" id="count-btns">
+      <button class="opt-btn active" data-val="1">单根</button>
+      <button class="opt-btn" data-val="2t">2根紧贴</button>
+      <button class="opt-btn" data-val="2s">2根有距</button>
+      <button class="opt-btn" data-val="3t">3根紧贴</button>
+      <button class="opt-btn" data-val="3s">3根有距</button>
     </div>
-
-    <!-- 电缆数量 -->
-    <div id="count-opts">
-      <label class="slabel" style="margin-top:4px">并联根数</label>
-      <div class="options-row" id="count-btns">
-        <button class="opt-btn active" data-val="1">单根</button>
-        <button class="opt-btn" data-val="2">双根并联</button>
-      </div>
-    </div>
-
-    <!-- 敷设方式 (电缆) -->
-    <div id="method-opts">
-      <label class="slabel" style="margin-top:2px">敷设方式</label>
-      <div class="options-row" id="method-btns">
-        <button class="opt-btn active" data-val="air">空气中</button>
-        <button class="opt-btn" data-val="pipe">穿管</button>
-        <button class="opt-btn" data-val="buried">埋地</button>
-      </div>
-    </div>
-
-    <!-- 铜排敷设 -->
-    <div id="bb-opts" class="hidden">
-      <label class="slabel" style="margin-top:2px">敷设方式</label>
-      <div class="options-row" id="bb-method-btns">
-        <button class="opt-btn active" data-val="open">户外架空</button>
-        <button class="opt-btn" data-val="closed">户内封闭</button>
-      </div>
+    <label class="sl" style="margin-top:4px">敷设方式</label>
+    <div class="options-row" id="method-btns">
+      <button class="opt-btn active" data-val="air">空气中</button>
+      <button class="opt-btn" data-val="pipe">穿管</button>
+      <button class="opt-btn" data-val="buried">埋地</button>
     </div>
   </div>
-
-  <!-- 电流输入 -->
-  <div class="card">
-    <label class="slabel">计算电流</label>
-    <div class="input-row">
-      <input type="number" id="current" value="200" min="1" step="1" oninput="calc()">
-      <span class="unit">A</span>
+  <div id="bb-opts" class="hidden">
+    <label class="sl" style="margin-top:4px">敷设方式</label>
+    <div class="options-row" id="bbm-btns">
+      <button class="opt-btn active" data-val="open">户外架空</button>
+      <button class="opt-btn" data-val="closed">户内封闭</button>
     </div>
-  </div>
-
-  <!-- 结果 -->
-  <div id="result-area"></div>
-
-  <!-- 参考表 -->
-  <div class="card" id="ref-card">
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px">📋 载流量参考表</div>
-    <div style="overflow-x:auto" id="ref-table-wrap"></div>
-  </div>
-
-  <div class="note">
-    ⚠️ <b>工程提示</b>：<br>
-    1. 电缆数据参考 GB 50217-2018，铜排参考 DL/T 5222-2021<br>
-    2. 铝电缆等效截面 ≈ 铜截面 × 1.6（铝导电率 ≈ 铜的 62%）<br>
-    3. 双根并联按不均流系数 1.05 折算（每根承受 52.5% 总电流）<br>
-    4. 电缆并列敷设间距 ≥ 2 倍外径；铜排并列间距 ≥ 排宽<br>
-    5. 大电流 (≥400A) 优先考虑铜排或双电缆方案，散热好、省空间
   </div>
 </div>
 
+<div class="card">
+  <label class="sl">计算电流</label>
+  <div class="input-row"><input type="number" id="I" value="200" min="1" oninput="calc()"><span class="unit">A</span></div>
+</div>
+
+<div id="result"></div>
+
+<div class="card">
+  <div style="font-size:14px;font-weight:600;margin-bottom:8px">📋 载流量参考表</div>
+  <div style="overflow-x:auto" id="reftbl"></div>
+</div>
+
+<div class="note">
+⚠️ <b>规范依据</b><br>
+1. <b>GB 50217-2018 表D.0.5</b> — 空气中单层多根并行敷设校正系数：2根s=d→0.90, s=2d→1.00；3根s=d→0.85, s=2d→0.98<br>
+2. <b>GB 50054-2011 §6.3.7</b> — 多根并联导体同型号/截面/长度/敷设方式时，载流量可按每根之和计<br>
+3. 铝载流量 ≈ 铜 × 0.77；铝等效截面 ≈ 铜 × 1.6<br>
+4. 大电流(≥400A)优先考虑铜排或并联方案
+</div>
+</div>
+
 <script>
-// ==== 数据 ====
-// 铜芯电缆载流量 (空气中 25°C)
-var cuCable=[
-  {s:1.5,a1:22,a3:18},{s:2.5,a1:30,a3:26},{s:4,a1:40,a3:35},{s:6,a1:50,a3:44},
-  {s:10,a1:68,a3:60},{s:16,a1:90,a3:80},{s:25,a1:118,a3:105},{s:35,a1:145,a3:130},
-  {s:50,a1:180,a3:160},{s:70,a1:225,a3:200},{s:95,a1:275,a3:245},{s:120,a1:320,a3:285},
-  {s:150,a1:365,a3:325},{s:185,a1:415,a3:370},{s:240,a1:490,a3:435},{s:300,a1:560,a3:500}
-];
+var C=[{s:1.5,a1:22,a3:18},{s:2.5,a1:30,a3:26},{s:4,a1:40,a3:35},{s:6,a1:50,a3:44},{s:10,a1:68,a3:60},{s:16,a1:90,a3:80},{s:25,a1:118,a3:105},{s:35,a1:145,a3:130},{s:50,a1:180,a3:160},{s:70,a1:225,a3:200},{s:95,a1:275,a3:245},{s:120,a1:320,a3:285},{s:150,a1:365,a3:325},{s:185,a1:415,a3:370},{s:240,a1:490,a3:435},{s:300,a1:560,a3:500}];
+var BB=[{sp:'40×4',a:160,o:640,c:512},{sp:'50×5',a:250,o:950,c:760},{sp:'60×6',a:360,o:1250,c:1000},{sp:'80×8',a:640,o:1800,c:1440},{sp:'100×10',a:1000,o:2500,c:2000},{sp:'120×12',a:1440,o:3100,c:2480},{sp:'150×15',a:2250,o:4000,c:3200},{sp:'200×20',a:4000,o:5800,c:4640}];
+var mf={air:1,pipe:0.72,buried:0.85}, cf={1:1,3:1,4:0.9,5:0.8};
+// divMap: GB50217表D.0.5 并列系数×根数
+var divMap={1:1,'2t':1.8,'2s':2,'3t':2.55,'3s':2.94};
+function alA(cu){return Math.round(cu*0.77)}
 
-// 铝芯电缆载流量 = 铜 × 0.77
-function alCableAmp(cu){ return Math.round(cu*0.77); }
+var tp='cu', cr='3', mt='air', bb='open', ct='1';
 
-// 铜排载流量
-var busbar=[
-  {spec:'40×4', area:160, open:640, closed:512},
-  {spec:'50×5', area:250, open:950, closed:760},
-  {spec:'60×6', area:360, open:1250, closed:1000},
-  {spec:'80×8', area:640, open:1800, closed:1440},
-  {spec:'100×10',area:1000,open:2500, closed:2000},
-  {spec:'120×12',area:1440,open:3100, closed:2480},
-  {spec:'150×15',area:2250,open:4000, closed:3200},
-  {spec:'200×20',area:4000,open:5800, closed:4640}
-];
+function ao(id,cb){document.querySelectorAll('#'+id+' .opt-btn').forEach(function(b){b.addEventListener('click',function(){this.parentElement.querySelectorAll('.opt-btn').forEach(function(x){x.classList.remove('active')});this.classList.add('active');cb(this.dataset.val);calc()})})}
+document.querySelectorAll('#type-opts .type-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('#type-opts .type-btn').forEach(function(x){x.classList.remove('active')});this.classList.add('active');tp=this.dataset.type;document.getElementById('cable-opts').classList.toggle('hidden',tp==='bb');document.getElementById('bb-opts').classList.toggle('hidden',tp!=='bb');calc()})});
+ao('core-btns',function(v){cr=v});ao('method-btns',function(v){mt=v});ao('count-btns',function(v){ct=v});ao('bbm-btns',function(v){bb=v});
 
-// 修正系数
-var cableMethod={air:1.0, pipe:0.72, buried:0.85};
-var coreFactors={1:1.0, 3:1.0, 4:0.9, 5:0.8};
+function cl(n){return{1:'单根','2t':'2根紧贴','2s':'2根有距','3t':'3根紧贴','3s':'3根有距'}[n]||''}
+function cn_(n){return{1:1,'2t':2,'2s':2,'3t':3,'3s':3}[n]||1}
+function cnote(n){return{'2t':'GB50217表D.0.5 s=d→0.90','2s':'GB50217表D.0.5 s=2d→1.00','3t':'GB50217表D.0.5 s=d→0.85','3s':'GB50217表D.0.5 s=2d→0.98'}[n]||''}
 
-// ==== 状态 ====
-var curType='cu', curCore='3', curMethod='air', curBbMethod='open', curCount='1';
-
-// 类型切换
-document.querySelectorAll('#type-opts .type-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#type-opts .type-btn').forEach(function(x){x.classList.remove('active')});
-    this.classList.add('active');
-    curType=this.dataset.type;
-    document.getElementById('core-opts').classList.toggle('hidden',curType==='bb');
-    document.getElementById('count-opts').classList.toggle('hidden',curType==='bb');
-    document.getElementById('method-opts').classList.toggle('hidden',curType==='bb');
-    document.getElementById('bb-opts').classList.toggle('hidden',curType!=='bb');
-    calc();
-  });
-});
-
-// 芯数
-document.querySelectorAll('#core-btns .opt-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#core-btns .opt-btn').forEach(function(x){x.classList.remove('active')});
-    this.classList.add('active');
-    curCore=this.dataset.val; calc();
-  });
-});
-
-// 敷设
-document.querySelectorAll('#method-btns .opt-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#method-btns .opt-btn').forEach(function(x){x.classList.remove('active')});
-    this.classList.add('active');
-    curMethod=this.dataset.val; calc();
-  });
-});
-
-// 铜排敷设
-document.querySelectorAll('#bb-method-btns .opt-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#bb-method-btns .opt-btn').forEach(function(x){x.classList.remove('active')});
-    this.classList.add('active');
-    curBbMethod=this.dataset.val; calc();
-  });
-});
-
-// 电缆根数
-document.querySelectorAll('#count-btns .opt-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('#count-btns .opt-btn').forEach(function(x){x.classList.remove('active')});
-    this.classList.add('active');
-    curCount=this.dataset.val; calc();
-  });
-});
-
-// ==== 计算 ====
 function calc(){
-  var I=parseFloat(document.getElementById('current').value)||0;
-  var area=document.getElementById('result-area');
-  if(I<=0){ area.innerHTML=''; return; }
-
-  var html='';
-
-  if(curType==='cu'){
-    // 铜电缆
-    var mf=cableMethod[curMethod], cf=coreFactors[curCore];
-    var n=parseInt(curCount);
-    // 双根并联：每根承受 0.55I（不均流1.1 + 并列敷设降容0.9 → 0.5/0.9≈0.55）
-    var div=n===2?1/0.55:1;
-    var Ieq=I/(mf*cf*div);
-    var sel=null;
-    for(var i=0;i<cuCable.length;i++){
-      var a=curCore==='1'?cuCable[i].a1:cuCable[i].a3;
-      if(!sel&&a>=Ieq) sel={r:cuCable[i], amp:a};
-    }
-    if(!sel){ var last=cuCable[cuCable.length-1]; sel={r:last,amp:curCore==='1'?last.a1:last.a3}; }
-
-    html+=buildCuResult(sel.r.s, sel.amp, I, Ieq, mf, cf, curCore);
-    // 铝等效
-    var alEqS=Math.round(sel.r.s*1.6);
-    var alEqA=alCableAmp(sel.amp);
-    html+=buildAlResult(alEqS, alEqA, Ieq, '等效');
-
-    renderCuRef(sel.r.s, -1);
+  var I=parseFloat(document.getElementById('I').value)||0;
+  if(I<=0){document.getElementById('result').innerHTML='';return}
+  var h='';
+  if(tp==='cu'){
+    var div=divMap[ct]||1, Ieq=I/(mf[mt]*cf[cr]*div);
+    var sel=null; for(var i=0;i<C.length;i++){var a=cr==='1'?C[i].a1:C[i].a3;if(!sel&&a>=Ieq)sel={r:C[i],amp:a}} if(!sel){var l=C[C.length-1];sel={r:l,amp:cr==='1'?l.a1:l.a3}}
+    h+=card('cu-card','🔶 铜电缆',sel.r.s+' mm²',sel.amp+' A',I,Math.round(Ieq),mf[mt]*cf[cr]*div,ct,cr);
+    h+=card('al-card','🔘 等效铝电缆',Math.round(sel.r.s*1.6)+' mm²',alA(sel.amp)+' A',I,null,null,ct,cr,'等效');
+    refCu(sel.r.s);
+  }else if(tp==='al'){
+    var div=divMap[ct]||1, Ieq=I/(mf[mt]*cf[cr]*div);
+    var sel=null; for(var i=0;i<C.length;i++){var cuA=cr==='1'?C[i].a1:C[i].a3;var alA_=alA(cuA);if(!sel&&alA_>=Ieq)sel={r:C[i],amp:alA_}} if(!sel){var l=C[C.length-1];sel={r:l,amp:alA(cr==='1'?l.a1:l.a3)}}
+    h+=card('al-card','🔘 铝电缆',sel.r.s+' mm²',sel.amp+' A',I,Math.round(Ieq),mf[mt]*cf[cr]*div,ct,cr,'主选');
+    refAl(sel.r.s);
+  }else{
+    var sel=null; for(var i=0;i<BB.length;i++){var a_=bb==='open'?BB[i].o:BB[i].c;if(!sel&&a_>=I)sel={b:BB[i],amp:a_}} if(!sel)sel={b:BB[BB.length-1],amp:bb==='open'?BB[BB.length-1].o:BB[BB.length-1].c}
+    h+=bbcard(sel.b,sel.amp,I);
+    refBb(sel.b.sp);
   }
-  else if(curType==='al'){
-    // 铝电缆
-    var mf=cableMethod[curMethod], cf=coreFactors[curCore];
-    var n=parseInt(curCount);
-    var div=n===2?1/0.55:1;
-    var Ieq=I/(mf*cf*div);
-    var sel=null;
-    for(var i=0;i<cuCable.length;i++){
-      var cuA=curCore==='1'?cuCable[i].a1:cuCable[i].a3;
-      var alA=alCableAmp(cuA);
-      if(!sel&&alA>=Ieq) sel={r:cuCable[i], amp:alA};
-    }
-    if(!sel){ var last=cuCable[cuCable.length-1]; sel={r:last,amp:alCableAmp(curCore==='1'?last.a1:last.a3)}; }
-
-    html+=buildAlResult(sel.r.s, sel.amp, I, Ieq, mf, cf, curCore, true);
-    renderAlRef(sel.r.s);
-  }
-  else if(curType==='bb'){
-    // 铜排
-    var sel=null;
-    for(var i=0;i<busbar.length;i++){
-      var a=curBbMethod==='open'?busbar[i].open:busbar[i].closed;
-      if(!sel&&a>=I) sel={b:busbar[i], amp:a};
-    }
-    if(!sel) sel={b:busbar[busbar.length-1], amp:curBbMethod==='open'?busbar[busbar.length-1].open:busbar[busbar.length-1].closed};
-
-    html+=buildBbResult(sel.b, sel.amp, I);
-    renderBbRef(sel.b.spec);
-  }
-
-  area.innerHTML=html;
+  document.getElementById('result').innerHTML=h;
 }
 
-function buildCuResult(s,amp,I,Ieq,mf,cf,core){
-  var n=parseInt(curCount);
-  var mname={air:'空气中',pipe:'穿管',buried:'埋地'};
-  var cname={'1':'单芯','3':'3芯','4':'4芯','5':'5芯'};
-  var cntLabel=n===2?' · 双根并联':' · 单根';
-  var cntNote=n===2?'每根承受 ≈ '+Math.round(I*0.55)+' A（总电流×0.55，含不均流1.1+并列0.9）':'';
-  return '<div class="card result-card copper-card">'+
-    '<div class="result-header"><span class="rtype">🔶 铜电缆选型</span><span class="rlabel">'+cname[core]+cntLabel+' · '+mname[curMethod]+'</span></div>'+
-    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
-    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>等效 <b>'+Math.round(Ieq)+' A</b></span><span>修正 <b>×'+(mf*cf*(n===2?1/0.55:1)).toFixed(2)+'</b></span></div>'+
-    (cntNote?'<div class="info-row" style="border-top:none;padding-top:0">'+cntNote+'</div>':'')+
-  '</div>';
+function card(cls,title,size,amp,I,Ieq,factor,n,core,sub){
+  var cnum=cn_(n), dual=cnum>1;
+  var mn={air:'空气中',pipe:'穿管',buried:'埋地'},cn={1:'单芯',3:'3芯',4:'4芯',5:'5芯'};
+  var rl=(sub?'铝截面≈铜×1.6':cn[core]+' · '+cl(n)+' · '+mn[mt]);
+  var cn2=cnote(n);
+  return '<div class="result-card '+cls+'"><div class="rh"><span class="rt">'+title+'</span><span class="rl">'+rl+'</span></div>'+
+    '<div class="rm"><span class="sz">'+size+'</span><span class="ap">'+(dual?'×'+cnum+'根 ':'')+'载流量 '+amp+'</span></div>'+
+    '<div class="ir"><span>输入 <b>'+I+' A</b></span>'+(Ieq?'<span>等效 <b>'+Ieq+' A</b></span>':'')+(factor?'<span>修正 <b>×'+factor.toFixed(2)+'</b></span>':'')+'</div>'+
+    (cn2?'<div class="ir" style="border-top:none;padding-top:0">📐 '+cn2+'</div>':'')+'</div>';
 }
 
-function buildAlResult(s,amp,I,Ieq,mf,cf,core,isMain){
-  var n=parseInt(curCount);
-  var mname={air:'空气中',pipe:'穿管',buried:'埋地'};
-  var cname={'1':'单芯','3':'3芯','4':'4芯','5':'5芯'};
-  var cntLabel=n===2?' · 双根并联':' · 单根';
-  var label=isMain?'🔘 铝电缆选型（直接选）':'🔘 等效铝电缆（同载流量）';
-  var sub=isMain?(cname[core]+cntLabel+' · '+mname[curMethod]):'铝截面 ≈ 铜 × 1.6';
-  var cntNote=n===2?'每根承受 ≈ '+Math.round(I*0.55)+' A（总电流×0.55，含不均流1.1+并列0.9）':'';
-  return '<div class="card result-card alum-card" style="margin-top:12px">'+
-    '<div class="result-header"><span class="rtype">'+label+'</span><span class="rlabel">'+sub+'</span></div>'+
-    '<div class="result-main"><span class="size">'+s+' mm²</span><span class="amp">'+(n===2?'×2 根  ':'')+'安全载流量 '+amp+' A</span></div>'+
-    '<div class="info-row"><span>输入 <b>'+I+' A</b></span>'+(Ieq!==undefined?'<span>等效 <b>'+Math.round(Ieq)+' A</b></span>':'')+'<span>铝载流量 ≈ 铜 × 0.77</span></div>'+
-    (cntNote?'<div class="info-row" style="border-top:none;padding-top:0">'+cntNote+'</div>':'')+
-  '</div>';
+function bbcard(b,amp,I){
+  return '<div class="result-card bb-card"><div class="rh"><span class="rt">🟦 铜排</span><span class="rl">'+(bb==='open'?'户外架空':'户内封闭')+'</span></div>'+
+    '<div class="rm"><span class="sz">'+b.sp+'</span><span class="ap">截面 '+b.a+' mm² | '+amp+' A</span></div>'+
+    '<div class="ir"><span>输入 <b>'+I+' A</b></span></div></div>';
 }
 
-function buildBbResult(b,amp,I){
-  return '<div class="card result-card bb-card">'+
-    '<div class="result-header"><span class="rtype">🟦 铜排选型</span><span class="rlabel">'+(curBbMethod==='open'?'户外架空':'户内封闭')+'</span></div>'+
-    '<div class="result-main"><span class="size">'+b.spec+'</span><span class="amp">截面积 '+b.area+' mm² &nbsp; 载流量 '+amp+' A</span></div>'+
-    '<div class="info-row"><span>输入 <b>'+I+' A</b></span><span>铜排 '+(curBbMethod==='open'?'架空':'封闭')+' 敷设</span></div>'+
-  '</div>';
+function refCu(hl){
+  var r='<table class="ref-table"><thead><tr><th>mm²</th><th>单芯A</th><th>3芯A</th><th>铝3芯A</th><th>铝等效</th></tr></thead><tbody>';
+  for(var i=0;i<C.length;i++){var c_=C[i];r+='<tr'+(c_.s===hl?' class="hl"':'')+'><td>'+c_.s+'</td><td>'+c_.a1+'</td><td>'+c_.a3+'</td><td>'+alA(c_.a3)+'</td><td>≈'+Math.round(c_.s*1.6)+'</td></tr>'}
+  r+='</tbody></table>';document.getElementById('reftbl').innerHTML=r;
 }
-
-// ==== 参考表 ====
-function renderCuRef(cuHl, alHl){
-  var rows='<table class="ref-table"><thead><tr><th>截面 mm²</th><th>单芯 A</th><th>3芯 A</th><th>铝3芯 A</th><th>铝等效截面</th></tr></thead><tbody>';
-  for(var i=0;i<cuCable.length;i++){
-    var r=cuCable[i];
-    var cls=(r.s===cuHl)?' class="hl-cu"':(r.s===alHl)?' class="hl-al"':'';
-    var alA=alCableAmp(r.a3);
-    var alEq=Math.round(r.s*1.6);
-    rows+='<tr'+cls+'><td>'+r.s+' mm²</td><td>'+r.a1+'</td><td>'+r.a3+'</td><td>'+alA+'</td><td>≈ '+alEq+' mm²</td></tr>';
-  }
-  rows+='</tbody></table>';
-  document.getElementById('ref-table-wrap').innerHTML=rows;
+function refAl(hl){
+  var r='<table class="ref-table"><thead><tr><th>mm²</th><th>铝单芯A</th><th>铝3芯A</th><th>等效铜</th></tr></thead><tbody>';
+  for(var i=0;i<C.length;i++){var c_=C[i];r+='<tr'+(c_.s===hl?' class="hl"':'')+'><td>'+c_.s+'</td><td>'+alA(c_.a1)+'</td><td>'+alA(c_.a3)+'</td><td>≈'+Math.round(c_.s/1.6)+'</td></tr>'}
+  r+='</tbody></table>';document.getElementById('reftbl').innerHTML=r;
 }
-
-function renderAlRef(alHl){
-  var rows='<table class="ref-table"><thead><tr><th>铝截面 mm²</th><th>铝单芯 A</th><th>铝3芯 A</th><th>等效铜截面</th></tr></thead><tbody>';
-  for(var i=0;i<cuCable.length;i++){
-    var r=cuCable[i];
-    var alA1=alCableAmp(r.a1), alA3=alCableAmp(r.a3);
-    var cls=(r.s===alHl)?' class="hl-al"':'';
-    rows+='<tr'+cls+'><td>'+r.s+' mm²</td><td>'+alA1+'</td><td>'+alA3+'</td><td>≈ '+Math.round(r.s/1.6)+' mm²</td></tr>';
-  }
-  rows+='</tbody></table>';
-  document.getElementById('ref-table-wrap').innerHTML=rows;
+function refBb(hl){
+  var r='<table class="ref-table"><thead><tr><th>规格</th><th>mm²</th><th>架空A</th><th>封闭A</th></tr></thead><tbody>';
+  for(var i=0;i<BB.length;i++){var b_=BB[i];r+='<tr'+(b_.sp===hl?' class="hl"':'')+'><td>'+b_.sp+'</td><td>'+b_.a+'</td><td>'+b_.o+'</td><td>'+b_.c+'</td></tr>'}
+  r+='</tbody></table>';document.getElementById('reftbl').innerHTML=r;
 }
-
-function renderBbRef(specHl){
-  var rows='<table class="ref-table"><thead><tr><th>规格</th><th>截面积 mm²</th><th>架空 A</th><th>封闭 A</th></tr></thead><tbody>';
-  for(var i=0;i<busbar.length;i++){
-    var b=busbar[i];
-    var cls=(b.spec===specHl)?' class="hl"':'';
-    rows+='<tr'+cls+'><td>'+b.spec+'</td><td>'+b.area+'</td><td>'+b.open+'</td><td>'+b.closed+'</td></tr>';
-  }
-  rows+='</tbody></table>';
-  document.getElementById('ref-table-wrap').innerHTML=rows;
-}
-
 calc();
-
-// PWA Service Worker
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(function(){
-    console.log('SW OK');
-  }).catch(function(){});
-}
 </script>
 </body>
 </html>
